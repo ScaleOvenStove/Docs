@@ -79,10 +79,11 @@ The result of the ``Index`` action is shown below - the response headers are dis
 Several of the filter interfaces have corresponding attributes that can be used as base classes for custom implementations.
 
 Filter attributes:
-	- `ActionFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ActionFilterAttribute/index.html>`_
-	- `AuthorizationFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/AuthorizationFilterAttribute/index.html>`_
-	- `ExceptionFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ExceptionFilterAttribute/index.html>`_
-	- `ResultFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ResultFilterAttribute/index.html>`_
+
+- `ActionFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ActionFilterAttribute/index.html>`_
+- `AuthorizationFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/AuthorizationFilterAttribute/index.html>`_
+- `ExceptionFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ExceptionFilterAttribute/index.html>`_
+- `ResultFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/ResultFilterAttribute/index.html>`_
 
 Dependency Injection
 ^^^^^^^^^^^^^^^^^^^^
@@ -90,9 +91,9 @@ Filters are not directly returned from :doc:`dependency injection </fundamentals
 
 However, if your filters have dependencies you need to access from DI, there are several supported approaches. You can apply your filter to a class or action method using
 
-	- The `ServiceFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/ServiceFilterAttribute/index.html>`_ 
-	- The `TypeFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/TypeFilterAttribute/index.html>`_ attribute
-	- `IFilterFactory <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/IFilterFactory/index.html>`__ implemented on your attribute
+- The `ServiceFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/ServiceFilterAttribute/index.html>`_ 
+- The `TypeFilterAttribute <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/TypeFilterAttribute/index.html>`_ attribute
+- `IFilterFactory <https://docs.asp.net/projects/api/en/latest/autoapi/Microsoft/AspNet/Mvc/Filters/IFilterFactory/index.html>`__ implemented on your attribute
 
 .. note:: Some of the filters shown in these examples implement logging in order to demonstrate when, where, or how they are executing. Avoid creating and using filters purely for logging purposes, since the :doc:`built-in framework logging features </fundamentals/logging>` should already provide what you need for logging. If you're going to add logging to your filters, it should focus on business domain concerns or behavior specific to your filter, rather than MVC actions or other framework events.  
   
@@ -126,7 +127,7 @@ Global filters are added in the ``ConfigureServices`` method in ``Startup``, whe
   :lines: 13-22
   :dedent: 8
 
-Filters can be added by type, or an instance can be added. If you add an instance, that instance will be used for every request. If you add a type, it will be type-activated, meaning the instance will be created through DI, and any constructor dependencies will be populated by DI. Adding a filter by type is equivalent to ``filters.Add(new TypeFilter(typeof(MyFilter)))``. In the example above, the :ref:`DurationActionFilter <duration-action-filter>` has a dependency on ``ILoggerFactory`` in its constructor, which is fulfilled by DI on each request.
+Filters can be added by type, or an instance can be added. If you add an instance, that instance will be used for every request. If you add a type, it will be type-activated, meaning an instance will be created for each request and any constructor dependencies will be populated by DI. Adding a filter by type is equivalent to ``filters.Add(new TypeFilterAttribute(typeof(MyFilter)))``. In the example above, the :ref:`DurationActionFilter <duration-action-filter>` has a dependency on ``ILoggerFactory`` in its constructor, which is fulfilled by DI on each request.
 
 To create a filter *without* global scope that requires dependencies from DI, apply the ``ServiceFilterAttribute`` or ``TypeFilterAttribute`` attribute to the controller or action. A ``TypeFilter`` will instantiate an instance, using services from DI for its dependencies. A ``ServiceFilter`` retrieves an instance of the filter from DI. The following example demonstrates using a ``ServiceFilter``:
 
@@ -138,9 +139,10 @@ To create a filter *without* global scope that requires dependencies from DI, ap
 
 Using ``ServiceFilter`` without registering the filter type in ``ConfigureServices``, throws the following exception:
 
-.. code-block: c#
+.. code-block:: c#
 
-	System.InvalidOperationException: No service for type 'FiltersSample.Filters.LoggingAddHeaderFilter' has been registered.
+	System.InvalidOperationException: No service for type 
+	'FiltersSample.Filters.LoggingAddHeaderFilter' has been registered.
 
 To avoid this exception, you must register the ``LoggingAddHeaderFilter`` type in ``ConfigureServices``:
 
@@ -197,14 +199,15 @@ To see the scope-based ordering in action, consider the following class, which h
   :dedent: 4
 
 The resulting order is:
-	#. The Controller ``OnActionExecuting``
-	#. The Global filter ``OnActionExecuting``
-	#. The Class filter ``OnActionExecuting``
-	#. The Method filter ``OnActionExecuting``
-	#. The Method filter ``OnActionExecuted``
-	#. The Class filter ``OnActionExecuted``
-	#. The Global filter ``OnActionExecuted``
-	#. The Controller ``OnActionExecuted``
+
+#. The Controller ``OnActionExecuting``
+#. The Global filter ``OnActionExecuting``
+#. The Class filter ``OnActionExecuting``
+#. The Method filter ``OnActionExecuting``
+#. The Method filter ``OnActionExecuted``
+#. The Class filter ``OnActionExecuted``
+#. The Global filter ``OnActionExecuted``
+#. The Controller ``OnActionExecuted``
 
 .. note:: ``IOrderedFilter`` trumps scope when determining the order in which filters will run. Filters are sorted first by order, then scope is used to break ties. Order defaults to 0 if not set.
 
@@ -217,14 +220,15 @@ To modify the default, scope-based order, you could explicitly set the ``Order``
 In this case, a value of less than zero would ensure this filter ran before both the Global and Class level filters.
 
 The new order would be:
-	#. The Controller ``OnActionExecuting``
-	#. The Method filter ``OnActionExecuting``
-	#. The Global filter ``OnActionExecuting``
-	#. The Class filter ``OnActionExecuting``
-	#. The Class filter ``OnActionExecuted``
-	#. The Global filter ``OnActionExecuted``
-	#. The Method filter ``OnActionExecuted``
-	#. The Controller ``OnActionExecuted``
+
+#. The Controller ``OnActionExecuting``
+#. The Method filter ``OnActionExecuting``
+#. The Global filter ``OnActionExecuting``
+#. The Class filter ``OnActionExecuting``
+#. The Class filter ``OnActionExecuted``
+#. The Global filter ``OnActionExecuted``
+#. The Method filter ``OnActionExecuted``
+#. The Controller ``OnActionExecuted``
 
 .. note:: The ``Controller`` class's methods always run before and after all filters. These methods are not implemented as ``IFilter`` instances and do not participate in the ``IFilter`` ordering algorithm.
 
@@ -232,9 +236,9 @@ The new order would be:
 
 Authorization Filters
 ---------------------
-*Authorization Filters* control access to action methods, and are the first filters to be executed within the filter pipeline. They have only a before stage, unlike most filters that support before and after methods. You should only write a custom authorization filter if you are writing your own authorization framework. Note that you should not throw exceptions within authorization filters, since nothing will handle the exception (exception filters won't handle them). Instead, issue a challenge or find another way. They are covered in the :doc:`Security </security/index>` section of the documentation.
+*Authorization Filters* control access to action methods, and are the first filters to be executed within the filter pipeline. They have only a before stage, unlike most filters that support before and after methods. You should only write a custom authorization filter if you are writing your own authorization framework. Note that you should not throw exceptions within authorization filters, since nothing will handle the exception (exception filters won't handle them). Instead, issue a challenge or find another way.
 
-Learn more about :doc:`/security/authorization/authorization-filters`.
+Learn more about :doc:`/security/authorization/index`.
 
 .. _resource-filters:
 
@@ -242,12 +246,12 @@ Resource Filters
 ----------------
 *Resource Filters* implement either the ``IResourceFilter`` or ``IAsyncResourceFilter`` interface, and their execution wraps most of the filter pipeline (only :ref:`authorization-filters` run before them - all other filters and action processing happens between their ``OnResourceExecuting`` and ``OnResourceExecuted`` methods). Resource filters are especially useful if you need to short-circuit most of the work a request is doing. Caching would be one example use case for a resource filter, since if the response is already in the cache, the filter can immediately set a result and avoid the rest of the processing for the action.
 
-The :ref:`short circuiting resource filter <short-circuiting-resource-filter>` shown above is one example of a resource filter. A very naive cache implementation (do not use this in production) is shown below:
+The :ref:`short circuiting resource filter <short-circuiting-resource-filter>` shown above is one example of a resource filter. A very naive cache implementation (do not use this in production) that only works with ``ContentResult`` action results is shown below:
 
 .. literalinclude:: filters/sample/src/FiltersSample/Filters/NaiveCacheResourceFilterAttribute.cs
   :language: c#
-  :emphasize-lines: 1-2,11,16,24,26
-  :lines: 8-36
+  :emphasize-lines: 1-2,11,16-17,27,30
+  :lines: 8-41
   :dedent: 4
 
 In ``OnResourceExecuting``, if the result is already in the static dictionary cache, the ``Result`` property is set on ``context``, and the action short-circuits and returns with the cached result. In the ``OnResourceExecuted`` method, if the current request's key isn't already in use, the current ``Result`` is stored in the cache, to be used by future requests.
@@ -268,21 +272,9 @@ Action Filters
 
 The ``OnActionExecuting`` method runs before the action method, so it can manipulate the inputs to the action by changing ``ActionExecutingContext.ActionArguments`` or manipulate the controller through ``ActionExecutingContext.Controller``. An ``OnActionExecuting`` method can short-circuit execution of the action method and subsequent action filters by setting ``ActionExecutingContext.Result``. Throwing an exception in an ``OnActionExecuting`` method will also prevent execution of the action method and subsequent filters, but will be treated as a failure instead of successful result.
 
-The ``OnActionExecuted`` method runs after the action method, and can see and manipulate the results of the action through the ``ActionExecutedContext.Result`` property. ``ActionExecutedContext.Canceled`` will be set to true if the action execution was short-circuited by another filter. ``ActionExecutedContext.Exception`` will be set to a non-null value if the action or a subsequent action filter threw an exception. Setting ``ActionExecutedContext.Exception`` to null effectively 'handles' an exception, and ``ActionExectedContext.Result`` will then be executed as if it were returned from the action method normally.
+The ``OnActionExecuted`` method runs after the action method and can see and manipulate the results of the action through the ``ActionExecutedContext.Result`` property. ``ActionExecutedContext.Canceled`` will be set to true if the action execution was short-circuited by another filter. ``ActionExecutedContext.Exception`` will be set to a non-null value if the action or a subsequent action filter threw an exception. Setting ``ActionExecutedContext.Exception`` to null effectively 'handles' an exception, and ``ActionExectedContext.Result`` will then be executed as if it were returned from the action method normally.
 
 For an ``IAsyncActionFilter`` the ``OnActionExecutionAsync`` combines all the possibilities of ``OnActionExecuting`` and ``OnActionExecuted``. A call to ``await next()`` on the ``ActionExecutionDelegate`` will execute any subsequent action filters and the action method, returning an ``ActionExecutedContext``. To short-circuit inside of an ``OnActionExecutionAsync``, assign ``ActionExecutingContext.Result`` to some result instance and do not call the ``ActionExectionDelegate``.
-
-The ``DurationActionFilter`` shown below uses a ``Stopwatch`` to measure the execution time of the action, for display on the page. The ``ViewData`` property of the ``ViewResult`` can be accessed and manipulated, including adding new values.
-
-.. _duration-action-filter:
-
-.. literalinclude:: filters/sample/src/FiltersSample/Filters/DurationActionFilter.cs
-  :language: c#
-  :emphasize-lines: 1,21-26
-  :lines: 8-35
-  :dedent: 4
-
-.. note:: You don't need to use this filter to log action times unless you need to display it on a page. The framework's built-in :doc:`logging </fundamentals/logging>` already logs action timing information.
 
 .. _exception-filters:
 
@@ -294,11 +286,11 @@ Exception filters handle unhandled exceptions. They are only called when an exce
 
 .. tip:: One example where you might need a different form of error handling for different actions would be in an app that exposes both API endpoints and actions that return views/HTML. The API endpoints could return error information as JSON, while the view-based actions could return an error page as HTML.
 
-Exception filters do not have two events (for before and after) - they only implement ``OnException`` (or ``OnExceptionAsync``). The ``ExceptionContext`` provided in the ``OnException`` parameter includes the ``Exception`` that occurred. If you set ``context.Exception`` to null, the effect is that you've handled the exception, so the request will proceed as if it hadn't occurred (generally returning a 200 OK status). The following filter logs exceptions and marks them as handled:
+Exception filters do not have two events (for before and after) - they only implement ``OnException`` (or ``OnExceptionAsync``). The ``ExceptionContext`` provided in the ``OnException`` parameter includes the ``Exception`` that occurred. If you set ``context.Exception`` to null, the effect is that you've handled the exception, so the request will proceed as if it hadn't occurred (generally returning a 200 OK status). The following filter uses a custom developer error view to display details about exceptions that occur when the application is in development:
 
-.. literalinclude:: filters/sample/src/FiltersSample/Filters/LoggingExceptionFilterAttribute.cs
+.. literalinclude:: filters/sample/src/FiltersSample/Filters/CustomExceptionFilterAttribute.cs
   :language: c#
-  :emphasize-lines: 7,15,18
+  :emphasize-lines: 33-34
 
 .. _result-filters:
 
@@ -306,7 +298,7 @@ Result Filters
 --------------
 *Result Filters* implement either the ``IResultFilter`` or ``IAsyncResultFilter`` interface and their execution surrounds the execution of action results. Result filters are only executed for successful results - when the action or action filters produce an action result. Result filters are not executed when exception filters handle an exception, unless the exception filter sets ``Exception = null``.
 
-.. note:: The kind of result being executed depends on the action in question. An MVC action returning a view would include all razor processing as part of the ``ViewResult`` being executed. An API method might perform some serialization as part of the execution of the result.
+.. note:: The kind of result being executed depends on the action in question. An MVC action returning a view would include all razor processing as part of the ``ViewResult`` being executed. An API method might perform some serialization as part of the execution of the result. Learn more about :doc:`action results </mvc/controllers/actions>`
 
 Result filters are ideal for any logic that needs to directly surround view execution or formatter execution. Result filters can replace or modify the action result that's responsible for producing the response.
 
@@ -316,7 +308,7 @@ The ``OnResultExecuted`` method runs after the action result has executed. At th
 
 For an ``IAsyncResultFilter`` the ``OnResultExecutionAsync`` combines all the possibilities of ``OnResultExecuting`` and ``OnResultExecuted``. A call to ``await next()`` on the ``ResultExecutionDelegate`` will execute any subsequent result filters and the action result, returning a ``ResultExecutedContext``. To short-circuit inside of an ``OnResultExecutionAsync``, set ``ResultExecutingContext.Cancel`` to true and do not call the ``ResultExectionDelegate``.
 
-You can override the built-in ``ResultFilterAttribute`` to create result filters. The :ref:`AddHeaderAttribute <add-header-attribute>` class shown above is an example of a resource filter.
+You can override the built-in ``ResultFilterAttribute`` to create result filters. The :ref:`AddHeaderAttribute <add-header-attribute>` class shown above is an example of a result filter.
 
 .. tip:: If you need to add headers to the response, do so before the action result executes. Otherwise, the response may have been sent to the client, and it will be too late to modify it. For a result filter, this means adding the header in ``OnResultExecuting`` rather than ``OnResultExecuted``.
 

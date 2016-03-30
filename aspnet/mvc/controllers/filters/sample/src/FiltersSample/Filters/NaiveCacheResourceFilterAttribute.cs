@@ -17,10 +17,11 @@ namespace FiltersSample.Filters
             _cacheKey = context.HttpContext.Request.Path.ToString();
             if (_cache.ContainsKey(_cacheKey))
             {
-                var result = _cache[_cacheKey] as IActionResult;
-                if (result != null)
+                var cachedValue = _cache[_cacheKey] as string;
+                if (cachedValue != null)
                 {
-                    context.Result = result;
+                    context.Result = new ContentResult()
+                    { Content= cachedValue };
                 }
             }
         }
@@ -30,7 +31,11 @@ namespace FiltersSample.Filters
             if (!String.IsNullOrEmpty(_cacheKey) &&
                 !_cache.ContainsKey(_cacheKey))
             {
-                _cache.Add(_cacheKey, context.Result);
+                var result = context.Result as ContentResult;
+                if (result != null)
+                {
+                    _cache.Add(_cacheKey, result.Content);
+                }
             }
         }
     }

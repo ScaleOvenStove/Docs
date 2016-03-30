@@ -38,14 +38,6 @@ namespace FiltersSample.Controllers
             return Content($"Hi {name}");
         }
 
-        [TypeFilter(typeof(DurationActionFilter))]
-        public IActionResult RandomTime()
-        {
-            _logger.LogInformation(nameof(RandomTime));
-            Thread.Sleep(new Random().Next(2000));
-            return View();
-        }
-
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             _logger.LogInformation(nameof(OnActionExecuting) + " from controller.");

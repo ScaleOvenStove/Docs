@@ -4,7 +4,7 @@ using Microsoft.AspNet.Mvc;
 
 namespace FiltersSample.Controllers
 {
-    [TypeFilter(typeof(LoggingExceptionFilterAttribute))]
+    [TypeFilter(typeof(CustomExceptionFilterAttribute))]
     public class FailingController : Controller
     {
         [AddHeader("FailingController","This shouldn't appear if exception was handled.")]
